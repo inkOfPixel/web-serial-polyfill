@@ -41,7 +41,7 @@ const kAcceptableStopBits = [1, 2];
 const kAcceptableParity = ['none', 'even', 'odd'];
 
 const kParityIndexMapping: ParityType[] =
-    ['none', 'odd', 'even'];
+  ['none', 'odd', 'even'];
 const kStopBitsIndexMapping = [1, 1.5, 2];
 
 const kDefaultPolyfillOptions = {
@@ -77,7 +77,7 @@ function findInterface(device: USBDevice, classCode: number): USBInterface {
  * @throws TypeError if no endpoint is found.
  */
 function findEndpoint(iface: USBInterface, direction: USBDirection):
-    USBEndpoint {
+  USBEndpoint {
   const alternate = iface.alternates[0];
   for (const endpoint of alternate.endpoints) {
     if (endpoint.direction == direction) {
@@ -85,7 +85,7 @@ function findEndpoint(iface: USBInterface, direction: USBDirection):
     }
   }
   throw new TypeError(`Interface ${iface.interfaceNumber} does not have an ` +
-                      `${direction} endpoint.`);
+    `${direction} endpoint.`);
 }
 
 /**
@@ -133,15 +133,15 @@ class UsbEndpointUnderlyingSource implements UnderlyingByteSource {
 
       try {
         const result = await this.device_.transferIn(
-            this.endpoint_.endpointNumber, chunkSize);
+          this.endpoint_.endpointNumber, chunkSize);
         if (result.status != 'ok') {
           controller.error(`USB error: ${result.status}`);
           this.onError_();
         }
         if (result.data?.buffer) {
           const chunk = new Uint8Array(
-              result.data.buffer, result.data.byteOffset,
-              result.data.byteLength);
+            result.data.buffer, result.data.byteOffset,
+            result.data.byteLength);
           controller.enqueue(chunk);
         }
       } catch (error) {
@@ -184,11 +184,11 @@ class UsbEndpointUnderlyingSink implements UnderlyingSink<Uint8Array> {
    * @param {WritableStreamDefaultController} controller
    */
   async write(
-      chunk: Uint8Array,
-      controller: WritableStreamDefaultController): Promise<void> {
+    chunk: Uint8Array,
+    controller: WritableStreamDefaultController): Promise<void> {
     try {
       const result =
-          await this.device_.transferOut(this.endpoint_.endpointNumber, chunk);
+        await this.device_.transferOut(this.endpoint_.endpointNumber, chunk);
       if (result.status != 'ok') {
         controller.error(result.status);
         this.onError_();
@@ -221,9 +221,9 @@ export class SerialPort {
    * configure the polyfill.
    */
   public constructor(
-      device: USBDevice,
-      polyfillOptions?: SerialPolyfillOptions) {
-    this.polyfillOptions_ = {...kDefaultPolyfillOptions, ...polyfillOptions};
+    device: USBDevice,
+    polyfillOptions?: SerialPolyfillOptions) {
+    this.polyfillOptions_ = { ...kDefaultPolyfillOptions, ...polyfillOptions };
     this.outputSignals_ = {
       dataTerminalReady: false,
       requestToSend: false,
@@ -232,11 +232,11 @@ export class SerialPort {
 
     this.device_ = device;
     this.controlInterface_ = findInterface(
-        this.device_,
-        this.polyfillOptions_.usbControlInterfaceClass as number);
+      this.device_,
+      this.polyfillOptions_.usbControlInterfaceClass as number);
     this.transferInterface_ = findInterface(
-        this.device_,
-        this.polyfillOptions_.usbTransferInterfaceClass as number);
+      this.device_,
+      this.polyfillOptions_.usbTransferInterfaceClass as number);
     this.inEndpoint_ = findEndpoint(this.transferInterface_, 'in');
     this.outEndpoint_ = findEndpoint(this.transferInterface_, 'out');
   }
@@ -249,13 +249,13 @@ export class SerialPort {
   public get readable(): ReadableStream<Uint8Array> | null {
     if (!this.readable_ && this.device_.opened) {
       this.readable_ = new ReadableStream<Uint8Array>(
-          new UsbEndpointUnderlyingSource(
-              this.device_, this.inEndpoint_, () => {
-                this.readable_ = null;
-              }),
-          {
-            highWaterMark: this.serialOptions_.bufferSize ?? kDefaultBufferSize,
-          });
+        new UsbEndpointUnderlyingSource(
+          this.device_, this.inEndpoint_, () => {
+            this.readable_ = null;
+          }),
+        {
+          highWaterMark: this.serialOptions_.bufferSize ?? kDefaultBufferSize,
+        });
     }
     return this.readable_;
   }
@@ -268,13 +268,13 @@ export class SerialPort {
   public get writable(): WritableStream<Uint8Array> | null {
     if (!this.writable_ && this.device_.opened) {
       this.writable_ = new WritableStream(
-          new UsbEndpointUnderlyingSink(
-              this.device_, this.outEndpoint_, () => {
-                this.writable_ = null;
-              }),
-          new ByteLengthQueuingStrategy({
-            highWaterMark: this.serialOptions_.bufferSize ?? kDefaultBufferSize,
-          }));
+        new UsbEndpointUnderlyingSink(
+          this.device_, this.outEndpoint_, () => {
+            this.writable_ = null;
+          }),
+        new ByteLengthQueuingStrategy({
+          highWaterMark: this.serialOptions_.bufferSize ?? kDefaultBufferSize,
+        }));
     }
     return this.writable_;
   }
@@ -299,11 +299,11 @@ export class SerialPort {
       await this.device_.claimInterface(this.controlInterface_.interfaceNumber);
       if (this.controlInterface_ !== this.transferInterface_) {
         await this.device_.claimInterface(
-            this.transferInterface_.interfaceNumber);
+          this.transferInterface_.interfaceNumber);
       }
 
       await this.setLineCoding();
-      await this.setSignals({dataTerminalReady: true});
+      await this.setSignals({ dataTerminalReady: true });
     } catch (error) {
       if (this.device_.opened) {
         await this.device_.close();
@@ -330,7 +330,7 @@ export class SerialPort {
     this.readable_ = null;
     this.writable_ = null;
     if (this.device_.opened) {
-      await this.setSignals({dataTerminalReady: false, requestToSend: false});
+      await this.setSignals({ dataTerminalReady: false, requestToSend: false });
       await this.device_.close();
     }
   }
@@ -363,7 +363,7 @@ export class SerialPort {
    * set
    */
   public reconfigure(options: SerialOptions): Promise<void> {
-    this.serialOptions_ = {...this.serialOptions_, ...options};
+    this.serialOptions_ = { ...this.serialOptions_, ...options };
     this.validateOptions();
     return this.setLineCoding();
   }
@@ -375,16 +375,16 @@ export class SerialPort {
    * has been changed.
    */
   public async setSignals(signals: SerialOutputSignals): Promise<void> {
-    this.outputSignals_ = {...this.outputSignals_, ...signals};
+    this.outputSignals_ = { ...this.outputSignals_, ...signals };
 
     if (signals.dataTerminalReady !== undefined ||
-        signals.requestToSend !== undefined) {
+      signals.requestToSend !== undefined) {
       // The Set_Control_Line_State command expects a bitmap containing the
       // values of all output signals that should be enabled or disabled.
       //
       // Ref: USB CDC specification version 1.1 §6.2.14.
       const value = (this.outputSignals_.dataTerminalReady ? 1 << 0 : 0) |
-                    (this.outputSignals_.requestToSend ? 1 << 1 : 0);
+        (this.outputSignals_.requestToSend ? 1 << 1 : 0);
 
       await this.device_.controlTransferOut({
         'requestType': 'class',
@@ -411,6 +411,29 @@ export class SerialPort {
         'index': this.controlInterface_.interfaceNumber,
       });
     }
+  }
+
+  /**
+   * Attach an event listener.
+   *
+   * @param {string} event the event to listen for.
+   * @param {Function} handleEvent the function to be triggered on the event.
+   */
+  public addEventListener(event: 'connect' | 'disconnect',
+    handleEvent: EventListener | EventListenerObject | null): void {
+    navigator.usb.addEventListener(event, handleEvent);
+  }
+
+  /**
+   * Remove an event listener.
+   *
+   * @param {string} event the event for which the listener should be removed.
+   * @param {Function} handleEvent the handler to be removed.
+   */
+  public removeEventListener(event: 'connect' | 'disconnect',
+    handleEvent: EventListener | EventListenerObject | null):
+    void {
+    navigator.usb.removeEventListener(event, handleEvent);
   }
 
   /**
@@ -492,11 +515,11 @@ export class SerialPort {
     const view = new DataView(buffer);
     view.setUint32(0, this.serialOptions_.baudRate, true);
     view.setUint8(
-        4, kStopBitsIndexMapping.indexOf(
-            this.serialOptions_.stopBits ?? kDefaultStopBits));
+      4, kStopBitsIndexMapping.indexOf(
+        this.serialOptions_.stopBits ?? kDefaultStopBits));
     view.setUint8(
-        5, kParityIndexMapping.indexOf(
-            this.serialOptions_.parity ?? kDefaultParity));
+      5, kParityIndexMapping.indexOf(
+        this.serialOptions_.parity ?? kDefaultParity));
     view.setUint8(6, this.serialOptions_.dataBits ?? kDefaultDataBits);
 
     const result = await this.device_.controlTransferOut({
@@ -522,9 +545,9 @@ class Serial {
    * @return {Promise<SerialPort>}
    */
   async requestPort(
-      options?: SerialPortRequestOptions,
-      polyfillOptions?: SerialPolyfillOptions): Promise<SerialPort> {
-    polyfillOptions = {...kDefaultPolyfillOptions, ...polyfillOptions};
+    options?: SerialPortRequestOptions,
+    polyfillOptions?: SerialPolyfillOptions): Promise<SerialPort> {
+    polyfillOptions = { ...kDefaultPolyfillOptions, ...polyfillOptions };
 
     const usbFilters: USBDeviceFilter[] = [];
     if (options && options.filters) {
@@ -548,7 +571,7 @@ class Serial {
       });
     }
 
-    const device = await navigator.usb.requestDevice({'filters': usbFilters});
+    const device = await navigator.usb.requestDevice({ 'filters': usbFilters });
     const port = new SerialPort(device, polyfillOptions);
     return port;
   }
@@ -562,8 +585,8 @@ class Serial {
    * ports.
    */
   async getPorts(polyfillOptions?: SerialPolyfillOptions):
-      Promise<SerialPort[]> {
-    polyfillOptions = {...kDefaultPolyfillOptions, ...polyfillOptions};
+    Promise<SerialPort[]> {
+    polyfillOptions = { ...kDefaultPolyfillOptions, ...polyfillOptions };
 
     const devices = await navigator.usb.getDevices();
     const ports: SerialPort[] = [];
